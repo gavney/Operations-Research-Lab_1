@@ -1,9 +1,9 @@
 """Общие форматы задачи и результата."""
 
-from typing import Literal, TypedDict
+from typing import Literal, TypedDict, Optional
 
 
-ConstraintRelation = Literal["<=", "=", ">="]  # Знак ограничения.
+ConstraintRelation = Literal["<=", "=", ">=", "∀"]  # Знак ограничения.
 SolveStatus = Literal["optimal", "infeasible", "unbounded", "iteration_limit"]  # Чем закончилось решение.
 
 
@@ -15,6 +15,7 @@ class LinearTask(TypedDict):
     constraint_signs: list[ConstraintRelation]  # Знаки ограничений в том же порядке.
     right_sides: list[float]  # Правые части b в том же порядке.
     maximize: bool  # True — max, False — min.
+    constraint_signs_of_xi: list[ConstraintRelation] #! знаки ограничений для самих переменных
 
 
 class SolveResult(TypedDict):
@@ -27,13 +28,18 @@ class SolveResult(TypedDict):
     message: str | None  # Пояснение к результату, если нужно.
 
 
+class LinearPlanCheckSystem(TypedDict):
+    """Система для проверки плана на оптимальность."""
+    constraint_matrix: list[list[float]] #! полученная после J система для проверки плана на оптимальность
+    right_sides: list[float] #! правые части в полученной системе
+
 class PlanCheckResult(TypedDict):
     """Результат проверки плана на оптимальность."""
 
     is_optimal: bool  # Выполнены ли условия оптимальности.
     message: str  # Краткий вывод по проверке.
     violations: list[str]  # Ограничения, нарушенные данным планом.
-    estimates: list[float]  # Оценки Δ из симплекс-таблицы.
+    estimates: Optional[list[float]]  #! Оценки Δ из симплекс-таблицы. Добавил возможность передачи None
 
 
 class TransportTask(TypedDict):
